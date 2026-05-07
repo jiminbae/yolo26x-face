@@ -1,0 +1,20 @@
+# YOLO26x WIDERFace 학습 환경
+# RTX PRO 6000 Blackwell (96GB GDDR7)
+
+# 핵심 패키지
+ultralytics>=8.3.0       # YOLO26 지원 버전
+torch>=2.5.0             # Blackwell (sm_100) 지원
+torchvision>=0.20.0
+
+# 유틸리티
+pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+tqdm>=4.65.0
+requests>=2.28.0
+pyyaml>=6.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# 평가
+scipy>=1.10.0

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Model weights (use git-lfs when ready to upload)
+*.pt
+*.pth
+*.ckpt
+
+# Training outputs
+runs/
+
+# Dataset (large files)
+datasets/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
