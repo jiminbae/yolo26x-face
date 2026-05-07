@@ -1,9 +1,8 @@
-# YOLO26x × WIDERFace Face Detection
-## RTX PRO 6000 Blackwell (96GB GDDR7) 최적화
+
 
 ---
 
-## 📋 환경 구성
+## 환경 구성
 
 ```bash
 # 1. Python 환경 (3.10+ 권장)
@@ -19,7 +18,7 @@ pip install -r requirements.txt
 
 ---
 
-## 📁 디렉토리 구조
+## 디렉토리 구조
 
 ```
 yolo26x_widerface/
@@ -50,7 +49,7 @@ yolo26x_widerface/
 
 ---
 
-## 🚀 실행 순서
+## 실행 순서
 
 ### Step 1. 데이터셋 준비
 
@@ -112,7 +111,7 @@ python train.py --mode predict --source path/to/image.jpg
 
 ---
 
-## ⏱️ 예상 학습 시간
+## 예상 학습 시간
 
 | 조건 | 시간 |
 |---|---|
@@ -121,7 +120,7 @@ python train.py --mode predict --source path/to/image.jpg
 
 ---
 
-## 📊 예상 성능 (WIDERFace val)
+## 예상 성능 (WIDERFace val)
 
 | Subset | 예상 AP |
 |---|---|
@@ -131,7 +130,7 @@ python train.py --mode predict --source path/to/image.jpg
 
 ---
 
-## 🔧 트러블슈팅
+## 트러블슈팅
 
 **CUDA out of memory:**
 ```bash
@@ -144,10 +143,4 @@ python train.py --mode train --batch 64 --imgsz 640
 ```python
 from ultralytics import YOLO
 model = YOLO("yolo26x.pt")  # 자동 다운로드
-```
-
-**Blackwell GPU 인식 안 됨:**
-```bash
-# PyTorch 2.5+ + CUDA 12.8 필요
-pip install torch --index-url https://download.pytorch.org/whl/cu128
 ```
