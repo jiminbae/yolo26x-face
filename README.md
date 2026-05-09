@@ -1,180 +1,223 @@
-# YOLO26x WIDERFace Face Detection
+# YOLO26x-Face
 
----
+YOLO26x-Face is a face detection model fine-tuned from Ultralytics YOLO26x on the WIDERFace dataset. The model is intended for face bounding-box detection in images and videos, with an emphasis on crowded scenes and small faces.
 
-## 환경 구성
+This repository contains the training, dataset conversion, evaluation, and export scripts. It does not include the WIDERFace dataset or model weights by default.
 
-```bash
-# 1. Python 환경 (3.10+ 권장)
-conda create -n yolo26face python=3.11
-conda activate yolo26face
+## Model Summary
 
-# 2. PyTorch (Blackwell sm_100 지원)
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+| Name | Image Size (pixels) | mAPval 50-95 | Params | GFLOPs |
+|---|---:|---:|---:|---:|
+| YOLO26x-Face | 1280 | 52.84 | 58.99M | 838.1 |
 
-# 3. 나머지 패키지
-pip install -r requirements.txt
-```
+The mAP value above is from Ultralytics validation on the local WIDERFace validation split. It is not the official WIDERFace Easy/Medium/Hard benchmark score.
 
----
+## Training Setup
 
-## 디렉토리 구조
+| Item | Value |
+|---|---|
+| GPU | NVIDIA RTX PRO 6000 Blackwell Workstation Edition |
+| VRAM | 96GB GDDR7 |
+| Training time | Approximately 12 hours |
+| Base model | `yolo26x.pt` |
+| Dataset | WIDERFace |
+| Task | Face detection |
+| Classes | 1 (`face`) |
+| Image size | 1280 |
+| Batch size | 16 |
+| Completed epochs | 70 |
+| Configured epochs | 100 |
+| Precision | AMP enabled |
 
-```
-yolo26x_widerface/
-├── prepare_widerface.py   # 데이터셋 변환
-├── train.py               # 학습 메인
-├── evaluate.py            # WIDERFace 공식 평가
-├── requirements.txt
-├── datasets/
-│   └── widerface/
-│       ├── raw/           # ← 여기에 zip 파일 위치
-│       │   ├── WIDER_train.zip
-│       │   ├── WIDER_val.zip
-│       │   └── wider_face_split.zip
-│       ├── images/
-│       │   ├── train/
-│       │   └── val/
-│       ├── labels/
-│       │   ├── train/
-│       │   └── val/
-│       └── widerface.yaml
-└── runs/
-    └── face/
-        └── yolo26x_widerface/
-            └── weights/
-                ├── best.pt
-                └── last.pt
-```
+## Training Results
 
----
+| Name | Training Time | Epochs | Batch Size | Non-default parameters | Link |
+|---|---:|---:|---:|---|---|
+| YOLO26x-Face | ~12 hours | 70 completed / 100 configured | 16 | `imgsz=1280`, `single_cls=True`, `cos_lr=True`, `close_mosaic=15`, `mosaic=1.0`, `mixup=0.15`, `copy_paste=0.1`, `save_period=10` | `runs/detect/runs/face/yolo26x_widerface/results.csv` |
 
-## 학습된 모델
+Best local validation metrics observed in `results.csv`:
 
-현재 로컬 학습 산출물은 아래 경로에 있습니다.
+| Epoch | Precision | Recall | mAP50 | mAP50-95 |
+|---:|---:|---:|---:|---:|
+| 66 | 90.63 | 82.37 | 88.75 | 52.84 |
 
-| 파일 | 크기 | 용도 |
-|---|---:|---|
-| `runs/detect/runs/face/yolo26x_widerface/weights/best.pt` | 113M | 검증 성능 기준 best checkpoint |
-| `runs/detect/runs/face/yolo26x_widerface/weights/last.pt` | 113M | 마지막 checkpoint |
-| `runs/detect/runs/face/yolo26x_widerface/weights/epoch*.pt` | 각 338M | 10 epoch 단위 중간 checkpoint |
+Last completed epoch:
 
-GitHub 일반 Git은 단일 파일 100MB를 넘는 파일 push를 막습니다. 그래서 weight 파일은 repo에 직접 커밋하지 않고, GitHub Release asset 또는 Git LFS로 배포하는 것을 권장합니다. 추론 배포만 필요하면 PyTorch checkpoint 대신 ONNX로 export해서 배포할 수 있습니다. 단, ONNX 파일도 100MB를 넘으면 일반 Git push 제한은 동일하게 적용됩니다.
+| Epoch | Precision | Recall | mAP50 | mAP50-95 |
+|---:|---:|---:|---:|---:|
+| 70 | 90.66 | 82.18 | 88.65 | 52.64 |
 
-Release asset으로 올린 뒤에는 아래처럼 내려받아 사용합니다.
+## Evaluation Results on WIDERFace Dataset
 
-```bash
-mkdir -p runs/face/yolo26x_widerface/weights
-# 예시: release asset URL로 교체
-curl -L -o runs/face/yolo26x_widerface/weights/best.pt <release-asset-url>
-```
+Official WIDERFace evaluation reports AP separately for Easy, Medium, and Hard subsets. This model has not yet been submitted to the official WIDERFace evaluator, so no official Easy/Medium/Hard scores are claimed here.
 
----
+| Name | Easy | Medium | Hard |
+|---|---:|---:|---:|
+| YOLO26x-Face | Not evaluated | Not evaluated | Not evaluated |
+| YOLOv8n-Face baseline | 93.79 | 91.82 | 79.38 |
 
-## 실행 순서
+## Download Links
 
-### Step 1. 데이터셋 준비
+Model weights are larger than GitHub's normal 100MB per-file Git limit and should be distributed through GitHub Releases, Git LFS, or another artifact store. The links below should be filled after the files are uploaded as release assets.
 
-WIDERFace 공식 사이트에서 다운로드:
-- https://shuoyang1213.me/WIDERFACE/
+| Name | Model Size (MB) | Link | SHA-256 |
+|---|---:|---|---|
+| YOLO26x-Face `best.pt` | 113 | TBD | `f749791ce9205e2df8bbb479201bce09b43423cac7f8e84d19cae6a01d0cea22` |
+| YOLO26x-Face `last.pt` | 113 | TBD | `bae681e5ec385daab7863c5807a07d837ccf148f3788fdffb025ae1320a05c0a` |
+| YOLO26x-Face ONNX | TBD | TBD | TBD |
 
-필요 파일을 `datasets/widerface/raw/` 에 위치:
-- `WIDER_train.zip`
-- `WIDER_val.zip`
-- `wider_face_split.zip`
-
-```bash
-python prepare_widerface.py
-```
-
-### Step 2. 학습
-
-```bash
-# 기본 (100 epoch, imgsz=1280, batch=16)
-python train.py --mode train
-
-# 커스텀 설정
-python train.py --mode train --epochs 200 --batch 32 --imgsz 1280
-
-# 중단된 학습 재개
-python train.py --mode train --resume
-
-# 특정 체크포인트에서 재개
-python train.py --mode train --resume-from runs/face/yolo26x_widerface/weights/last.pt
-```
-
-### Step 3. 평가
-
-```bash
-# 빠른 검증 (Ultralytics mAP)
-python evaluate.py --mode quick
-
-# WIDERFace 공식 평가 (Easy/Medium/Hard AP)
-python evaluate.py --mode official
-```
-
-### Step 4. TensorRT 변환 (배포)
-
-```bash
-python train.py --mode export --weights runs/detect/runs/face/yolo26x_widerface/weights/best.pt
-```
-
-### Step 5. ONNX 변환 (범용 배포)
+To generate an ONNX model for deployment:
 
 ```bash
 python train.py --mode export --format onnx --weights runs/detect/runs/face/yolo26x_widerface/weights/best.pt
 ```
 
-### Step 6. 추론
+If the exported ONNX file is under 100MB, it may be committed directly to Git. If it is over 100MB, distribute it as a release asset or with Git LFS.
+
+## Installation
+
+Python 3.10 or newer is recommended.
 
 ```bash
-python train.py --mode predict --source path/to/image.jpg
+conda create -n yolo26face python=3.11
+conda activate yolo26face
+
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+pip install -r requirements.txt
 ```
 
----
+## Dataset Preparation
 
-## ⚙️ RTX PRO 6000 Blackwell 최적화 설정
+Download WIDERFace from the official dataset page:
 
-| 파라미터 | 값 | 이유 |
-|---|---|---|
-| `imgsz` | 1280 | 소형 얼굴 탐지 강화 |
-| `batch` | 16 | 1280px 학습 안정성 우선 |
-| `workers` | 8 | 안정적인 데이터 로딩 |
-| `amp` | True | Blackwell BF16 Tensor Core |
-| `cache` | ram | 빠른 데이터 로딩 |
+https://shuoyang1213.me/WIDERFACE/
 
----
+Place the downloaded archives here:
 
-## 예상 학습 시간
+```text
+datasets/widerface/raw/
+|-- WIDER_train.zip
+|-- WIDER_val.zip
+`-- wider_face_split.zip
+```
 
-| 조건 | 시간 |
-|---|---|
-| RTX PRO 6000 Blackwell, 100 epoch, imgsz=1280 | 환경에 따라 변동 |
-| RTX PRO 6000 Blackwell, 100 epoch, imgsz=640  | 환경에 따라 변동 |
+Convert the dataset to YOLO format:
 
----
-
-## 예상 성능 (WIDERFace val)
-
-| Subset | 예상 AP |
-|---|---|
-| Easy   | ~98% |
-| Medium | ~97% |
-| Hard   | ~93~94% |
-
----
-
-## 트러블슈팅
-
-**CUDA out of memory:**
 ```bash
-python train.py --mode train --batch 32 --imgsz 1280
-# 또는
-python train.py --mode train --batch 64 --imgsz 640
+python prepare_widerface.py
 ```
 
-**YOLO26 모델 없음:**
-```python
-from ultralytics import YOLO
-model = YOLO("yolo26x.pt")  # 자동 다운로드
+Expected dataset layout after conversion:
+
+```text
+datasets/widerface/
+|-- images/
+|   |-- train/
+|   `-- val/
+|-- labels/
+|   |-- train/
+|   `-- val/
+`-- widerface.yaml
 ```
+
+## Training
+
+Start training:
+
+```bash
+python train.py --mode train
+```
+
+Override common settings:
+
+```bash
+python train.py --mode train --epochs 100 --batch 16 --imgsz 1280
+```
+
+Resume from the latest detected checkpoint:
+
+```bash
+python train.py --mode train --resume
+```
+
+Resume from a specific checkpoint:
+
+```bash
+python train.py --mode train --resume-from runs/detect/runs/face/yolo26x_widerface/weights/last.pt
+```
+
+## Evaluation
+
+Run Ultralytics validation:
+
+```bash
+python evaluate.py --mode quick
+```
+
+Run the WIDERFace-format evaluation workflow:
+
+```bash
+python evaluate.py --mode official
+```
+
+Official Easy/Medium/Hard WIDERFace scores should only be reported after running the official evaluation protocol or submitting predictions to the benchmark evaluator.
+
+## Export
+
+Export to TensorRT:
+
+```bash
+python train.py --mode export --format engine --weights runs/detect/runs/face/yolo26x_widerface/weights/best.pt
+```
+
+Export to ONNX:
+
+```bash
+python train.py --mode export --format onnx --weights runs/detect/runs/face/yolo26x_widerface/weights/best.pt
+```
+
+## Inference
+
+Run prediction on an image, directory, video, or stream supported by Ultralytics:
+
+```bash
+python train.py --mode predict --weights runs/detect/runs/face/yolo26x_widerface/weights/best.pt --source path/to/image.jpg
+```
+
+## Repository Policy
+
+The repository intentionally excludes large generated artifacts:
+
+```text
+datasets/
+runs/
+*.pt
+*.pth
+*.ckpt
+venv/
+```
+
+Use release assets, Git LFS, or an external artifact store for trained weights and exported models.
+
+## License and Dataset Compliance
+
+This project uses Ultralytics YOLO tooling and a YOLO26 pretrained model. Ultralytics YOLO software and trained models are subject to Ultralytics licensing terms, including AGPL-3.0 by default or an Enterprise License for use cases that require different commercial terms. Users are responsible for ensuring their use, redistribution, and deployment of derived weights complies with the applicable Ultralytics license.
+
+This repository does not redistribute WIDERFace images, annotations, or archives. Users must download WIDERFace from the official dataset source and comply with the dataset's terms of use. Do not commit or redistribute the dataset files through this repository.
+
+If you use WIDERFace, cite:
+
+```bibtex
+@inproceedings{yang2016wider,
+  author = {Yang, Shuo and Luo, Ping and Loy, Chen Change and Tang, Xiaoou},
+  title = {WIDER FACE: A Face Detection Benchmark},
+  booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year = {2016}
+}
+```
+
+Relevant policy and documentation links:
+
+- Ultralytics license: https://www.ultralytics.com/license
+- Ultralytics documentation: https://docs.ultralytics.com/
+- WIDERFace dataset: https://shuoyang1213.me/WIDERFACE/
