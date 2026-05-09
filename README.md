@@ -58,13 +58,13 @@ Official WIDERFace evaluation reports AP separately for Easy, Medium, and Hard s
 
 ## Download Links
 
-Model weights are larger than GitHub's normal 100MB per-file Git limit and should be distributed through GitHub Releases, Git LFS, or another artifact store. The links below should be filled after the files are uploaded as release assets.
+Model weights are larger than GitHub's normal 100MB per-file Git limit and should be distributed through GitHub Releases. The links below use release tag `v0.1.0` and asset names `best.pt`, `last.pt`, and `best.onnx`; upload those assets to the release before publishing the links.
 
 | Name | Model Size (MB) | Link | SHA-256 |
 |---|---:|---|---|
-| YOLO26x-Face `best.pt` | 113 | TBD | `f749791ce9205e2df8bbb479201bce09b43423cac7f8e84d19cae6a01d0cea22` |
-| YOLO26x-Face `last.pt` | 113 | TBD | `bae681e5ec385daab7863c5807a07d837ccf148f3788fdffb025ae1320a05c0a` |
-| YOLO26x-Face ONNX | TBD | TBD | TBD |
+| YOLO26x-Face `best.pt` | 113 | https://github.com/jiminbae/yolo26x-face/releases/download/v0.1.0/best.pt | `f749791ce9205e2df8bbb479201bce09b43423cac7f8e84d19cae6a01d0cea22` |
+| YOLO26x-Face `last.pt` | 113 | https://github.com/jiminbae/yolo26x-face/releases/download/v0.1.0/last.pt | `bae681e5ec385daab7863c5807a07d837ccf148f3788fdffb025ae1320a05c0a` |
+| YOLO26x-Face ONNX | 214 | https://github.com/jiminbae/yolo26x-face/releases/download/v0.1.0/best.onnx | `49bb0c123a3b0775d21fcf6f29d401eb60babd56b7d04f68a370a2ecf5037adf` |
 
 To generate an ONNX model for deployment:
 
