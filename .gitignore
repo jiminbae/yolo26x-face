@@ -20,6 +20,8 @@ env/
 
 # Training outputs
 runs/
+widerface_eval/
+WiderFace-Evaluation/
 
 # Dataset (large files)
 datasets/

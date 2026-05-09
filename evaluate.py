@@ -16,7 +16,7 @@ from ultralytics import YOLO
 # ══════════════════════════════════════════════════════════════════
 #  설정
 # ══════════════════════════════════════════════════════════════════
-WEIGHTS      = "runs/face/yolo26x_widerface/weights/best.pt"
+WEIGHTS      = "runs/detect/runs/face/yolo26x_widerface/weights/best.pt"
 VAL_IMG_DIR  = Path("datasets/widerface/raw/WIDER_val/images")
 PRED_DIR     = Path("widerface_eval/predictions")
 GT_DIR       = Path("widerface_eval/ground_truth")   # 공식 eval 코드 필요
@@ -55,6 +55,7 @@ def generate_predictions():
                 conf    = CONF,
                 iou     = IOU,
                 device  = DEVICE,
+                max_det = 3000,
                 verbose = False,
             )
 
@@ -100,13 +101,13 @@ def run_evaluation():
             "https://github.com/wondervictor/WiderFace-Evaluation.git"
         ], check=True)
         subprocess.run(
-            ["python", "setup.py", "build_ext", "--inplace"],
+            [os.sys.executable, "setup.py", "build_ext", "--inplace"],
             cwd="WiderFace-Evaluation", check=True
         )
 
     # 평가 실행
     result = subprocess.run([
-        "python", str(eval_script),
+        os.sys.executable, str(eval_script),
         "-p", str(PRED_DIR),
         "-g", str(GT_DIR),
     ], capture_output=True, text=True)

@@ -10,7 +10,7 @@ This repository contains the training, dataset conversion, evaluation, and expor
 |---|---:|---:|---:|---:|
 | YOLO26x-Face | 1280 | 52.84 | 58.99M | 838.1 |
 
-The mAP value above is from Ultralytics validation on the local WIDERFace validation split. It is not the official WIDERFace Easy/Medium/Hard benchmark score.
+The mAP value above is from Ultralytics validation on the local WIDERFace validation split. Official WIDERFace Easy/Medium/Hard AP is reported separately below.
 
 ## Training Setup
 
@@ -49,11 +49,11 @@ Last completed epoch:
 
 ## Evaluation Results on WIDERFace Dataset
 
-Official WIDERFace evaluation reports AP separately for Easy, Medium, and Hard subsets. This model has not yet been submitted to the official WIDERFace evaluator, so no official Easy/Medium/Hard scores are claimed here.
+Official WIDERFace evaluation reports AP separately for Easy, Medium, and Hard subsets. The YOLO26x-Face scores below were computed locally with the WIDERFace validation annotations and the `wondervictor/WiderFace-Evaluation` Python evaluator.
 
 | Name | Easy | Medium | Hard |
 |---|---:|---:|---:|
-| YOLO26x-Face | Not evaluated | Not evaluated | Not evaluated |
+| YOLO26x-Face | 96.94 | 96.30 | 90.90 |
 | YOLOv8n-Face baseline | 93.79 | 91.82 | 79.38 |
 
 ## Download Links
