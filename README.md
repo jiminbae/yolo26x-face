@@ -1,4 +1,4 @@
-
+# YOLO26x WIDERFace Face Detection
 
 ---
 
@@ -49,6 +49,28 @@ yolo26x_widerface/
 
 ---
 
+## 학습된 모델
+
+현재 로컬 학습 산출물은 아래 경로에 있습니다.
+
+| 파일 | 크기 | 용도 |
+|---|---:|---|
+| `runs/detect/runs/face/yolo26x_widerface/weights/best.pt` | 113M | 검증 성능 기준 best checkpoint |
+| `runs/detect/runs/face/yolo26x_widerface/weights/last.pt` | 113M | 마지막 checkpoint |
+| `runs/detect/runs/face/yolo26x_widerface/weights/epoch*.pt` | 각 338M | 10 epoch 단위 중간 checkpoint |
+
+GitHub 일반 Git은 단일 파일 100MB를 넘는 파일 push를 막습니다. 그래서 weight 파일은 repo에 직접 커밋하지 않고, GitHub Release asset 또는 Git LFS로 배포하는 것을 권장합니다. 추론 배포만 필요하면 PyTorch checkpoint 대신 ONNX로 export해서 배포할 수 있습니다. 단, ONNX 파일도 100MB를 넘으면 일반 Git push 제한은 동일하게 적용됩니다.
+
+Release asset으로 올린 뒤에는 아래처럼 내려받아 사용합니다.
+
+```bash
+mkdir -p runs/face/yolo26x_widerface/weights
+# 예시: release asset URL로 교체
+curl -L -o runs/face/yolo26x_widerface/weights/best.pt <release-asset-url>
+```
+
+---
+
 ## 실행 순서
 
 ### Step 1. 데이터셋 준비
@@ -68,11 +90,17 @@ python prepare_widerface.py
 ### Step 2. 학습
 
 ```bash
-# 기본 (300 epoch, imgsz=1280, batch=64)
+# 기본 (100 epoch, imgsz=1280, batch=16)
 python train.py --mode train
 
 # 커스텀 설정
 python train.py --mode train --epochs 200 --batch 32 --imgsz 1280
+
+# 중단된 학습 재개
+python train.py --mode train --resume
+
+# 특정 체크포인트에서 재개
+python train.py --mode train --resume-from runs/face/yolo26x_widerface/weights/last.pt
 ```
 
 ### Step 3. 평가
@@ -88,10 +116,16 @@ python evaluate.py --mode official
 ### Step 4. TensorRT 변환 (배포)
 
 ```bash
-python train.py --mode export --weights runs/face/yolo26x_widerface/weights/best.pt
+python train.py --mode export --weights runs/detect/runs/face/yolo26x_widerface/weights/best.pt
 ```
 
-### Step 5. 추론
+### Step 5. ONNX 변환 (범용 배포)
+
+```bash
+python train.py --mode export --format onnx --weights runs/detect/runs/face/yolo26x_widerface/weights/best.pt
+```
+
+### Step 6. 추론
 
 ```bash
 python train.py --mode predict --source path/to/image.jpg
@@ -104,8 +138,8 @@ python train.py --mode predict --source path/to/image.jpg
 | 파라미터 | 값 | 이유 |
 |---|---|---|
 | `imgsz` | 1280 | 소형 얼굴 탐지 강화 |
-| `batch` | 64 | 96GB VRAM 최대 활용 |
-| `workers` | 16 | 24,064 CUDA cores |
+| `batch` | 16 | 1280px 학습 안정성 우선 |
+| `workers` | 8 | 안정적인 데이터 로딩 |
 | `amp` | True | Blackwell BF16 Tensor Core |
 | `cache` | ram | 빠른 데이터 로딩 |
 
@@ -115,8 +149,8 @@ python train.py --mode predict --source path/to/image.jpg
 
 | 조건 | 시간 |
 |---|---|
-| RTX PRO 6000 Blackwell, 300 epoch, imgsz=1280 | **약 6~9시간** |
-| RTX PRO 6000 Blackwell, 300 epoch, imgsz=640  | **약 3~5시간** |
+| RTX PRO 6000 Blackwell, 100 epoch, imgsz=1280 | 환경에 따라 변동 |
+| RTX PRO 6000 Blackwell, 100 epoch, imgsz=640  | 환경에 따라 변동 |
 
 ---
 

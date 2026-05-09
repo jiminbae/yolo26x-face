@@ -35,9 +35,9 @@ CFG = {
     # ── 학습 설정 ─────────────────────────────────────────────────
     "epochs":       100,
     "patience":     20,         # 조기 종료 patience
-    "resume":       True,      # 중단된 학습 재개 여부
-    "exist_ok":     True,      # 기존 결과 덮어쓰기 허용
-    "batch":        64,         # 96GB VRAM → 64 안정적 (1280px 기준)
+    "resume":       False,     # 중단된 학습 재개 여부
+    "resume_from":  None,      # 명시적으로 재개할 체크포인트
+    "batch":        16,         # 1280px 기준 안정적 기본값
     "workers":      8,         # 24,064 CUDA cores 최대 활용
     "device":       0,          # GPU 0
 
@@ -102,6 +102,14 @@ CFG = {
     "dropout":      0.0,
     "fraction":     1.0,        # 전체 데이터 사용
 }
+
+
+def find_latest_checkpoint() -> Path | None:
+    candidates = list(Path("runs").glob("**/weights/last.pt"))
+    if not candidates:
+        return None
+
+    return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -188,12 +196,43 @@ def train():
     print(f"  출력  : {CFG['project']}/{CFG['name']}")
     print()
 
+    # resume 시에는 명시된 checkpoint를 우선 사용
+    model_path = Path(CFG["model"])
+    if CFG["resume_from"]:
+        model_path = Path(CFG["resume_from"])
+        print(f"  resume-from 체크포인트: {model_path}")
+        CFG["resume"] = True
+        CFG["workers"] = min(CFG["workers"], 4)
+    elif CFG["resume"]:
+        checkpoint = find_latest_checkpoint()
+        if checkpoint is not None:
+            print(f"  resume 체크포인트: {checkpoint}")
+            model_path = checkpoint
+            CFG["workers"] = min(CFG["workers"], 4)
+        else:
+            print("  ⚠️  resume=True 이지만 last.pt를 찾지 못해 새 학습을 시작합니다.")
+            CFG["resume"] = False
+
     # 모델 로드
-    model = YOLO(CFG["model"])
+    model = YOLO(str(model_path))
 
     # 학습
     t0 = time.time()
-    results = model.train(**CFG)
+    train_cfg = dict(CFG)
+    train_cfg.pop("resume_from", None)
+    try:
+        results = model.train(**train_cfg)
+    except RuntimeError as exc:
+        if "CUBLAS_STATUS_ALLOC_FAILED" not in str(exc):
+            raise
+
+        print("  ⚠️  CUDA/cuBLAS 메모리 할당 실패 → AMP 끄고 workers=0으로 1회 재시도합니다.")
+        torch.cuda.empty_cache()
+
+        fallback_cfg = dict(train_cfg)
+        fallback_cfg["amp"] = False
+        fallback_cfg["workers"] = 0
+        results = model.train(**fallback_cfg)
     elapsed = time.time() - t0
 
     h = int(elapsed // 3600)
@@ -236,26 +275,30 @@ def validate(weights: str = None):
 
 
 # ══════════════════════════════════════════════════════════════════
-#  TensorRT 변환 (배포용)
+#  모델 변환 (배포용)
 # ══════════════════════════════════════════════════════════════════
-def export_tensorrt(weights: str = None):
+def export_model(weights: str = None, export_format: str = "engine"):
     if weights is None:
         weights = f"{CFG['project']}/{CFG['name']}/weights/best.pt"
 
     print("=" * 60)
-    print("  TensorRT 변환 (FP16)")
+    print(f"  {export_format.upper()} 변환")
     print("=" * 60)
 
     model = YOLO(weights)
-    model.export(
-        format   = "engine",    # TensorRT
-        imgsz    = CFG["imgsz"],
-        half     = True,        # FP16
-        device   = CFG["device"],
-        simplify = True,
-        workspace = 8,          # GB
-    )
-    print(f"  ✅ TensorRT 엔진 저장 완료")
+    export_kwargs = {
+        "format": export_format,
+        "imgsz": CFG["imgsz"],
+        "device": CFG["device"],
+        "simplify": True,
+    }
+
+    if export_format == "engine":
+        export_kwargs["half"] = True
+        export_kwargs["workspace"] = 8
+
+    model.export(**export_kwargs)
+    print(f"  ✅ {export_format.upper()} 저장 완료")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -294,23 +337,43 @@ if __name__ == "__main__":
         help="실행 모드"
     )
     parser.add_argument("--weights", type=str, default=None, help="가중치 경로")
+    parser.add_argument(
+        "--format",
+        choices=["engine", "onnx"],
+        default="engine",
+        help="export 포맷",
+    )
+    parser.add_argument(
+        "--resume-from",
+        type=str,
+        default=None,
+        help="지정한 체크포인트에서 학습 재개 (예: runs/.../weights/epoch10.pt)",
+    )
     parser.add_argument("--source",  type=str, default=None, help="추론 소스")
     parser.add_argument("--epochs",  type=int, default=None, help="학습 epoch 수")
     parser.add_argument("--batch",   type=int, default=None, help="배치 크기")
     parser.add_argument("--imgsz",   type=int, default=None, help="이미지 크기")
+    parser.add_argument("--resume", action="store_true", help="이전 체크포인트에서 학습 재개")
     args = parser.parse_args()
 
     # 인자 오버라이드
-    if args.epochs: CFG["epochs"] = args.epochs
-    if args.batch:  CFG["batch"]  = args.batch
-    if args.imgsz:  CFG["imgsz"]  = args.imgsz
+    if args.epochs:  CFG["epochs"] = args.epochs
+    if args.batch:   CFG["batch"]  = args.batch
+    if args.imgsz:   CFG["imgsz"]  = args.imgsz
+    if args.weights: CFG["model"]  = args.weights
+    if args.resume_from:
+        resume_path = Path(args.resume_from)
+        if not resume_path.exists():
+            raise FileNotFoundError(f"resume-from 경로가 없습니다: {resume_path}")
+        CFG["resume_from"] = str(resume_path)
+    if args.resume:  CFG["resume"] = True
 
     if args.mode == "train":
         train()
     elif args.mode == "val":
         validate(args.weights)
     elif args.mode == "export":
-        export_tensorrt(args.weights)
+        export_model(args.weights, args.format)
     elif args.mode == "predict":
         if not args.source:
             raise ValueError("--source 필요")
