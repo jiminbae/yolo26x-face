@@ -1,6 +1,6 @@
 # YOLO26x-Face
 
-YOLO26x-Face is a face detection model fine-tuned from Ultralytics YOLO26x on the WIDERFace dataset. The model is intended for face bounding-box detection in images and videos, with an emphasis on crowded scenes and small faces.
+YOLO26x-Face is a face detection model fine-tuned from Ultralytics YOLO26x on the WIDERFace dataset. YOLO26x-Face is intended for face bounding-box detection in images and videos, with an emphasis on crowded scenes and small faces.
 
 This repository contains the training, dataset conversion, evaluation, and export scripts. It does not include the WIDERFace dataset or model weights by default.
 
