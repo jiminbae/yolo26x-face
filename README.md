@@ -1,6 +1,6 @@
 # YOLO26x-Face
 
-YOLO26x-Face is a face detection model fine-tuned from Ultralytics YOLO26x on the WIDERFace dataset. YOLO26x-Face is intended for face bounding-box detection in images and videos, with an emphasis on crowded scenes and small faces.
+YOLO26x-Face is a face detection model fine-tuned from Ultralytics YOLO26x on the WIDERFace dataset. YOLO26x-Face is intended for face bounding-box detection in images and videos, with a focus on crowded scenes and small faces.
 
 This repository contains the training, dataset conversion, evaluation, and export scripts. It does not include the WIDERFace dataset or model weights by default.
 
@@ -8,7 +8,7 @@ This repository contains the training, dataset conversion, evaluation, and expor
 
 ![YOLO26x-Face inference demo](assets/people_crossing_inference.gif)
 
-The demo was generated with `best.pt` on a Pexels video by Matheus Bertelli. Source video: https://www.pexels.com/ko-kr/video/19229786/
+Inference demo using `best.pt` on a Pexels crowd-scene video by Matheus Bertelli.
 
 ## Model Summary
 
@@ -64,7 +64,7 @@ Official WIDERFace evaluation reports AP separately for Easy, Medium, and Hard s
 
 ## Download Links
 
-Model weights are larger than GitHub's normal 100MB per-file Git limit and should be distributed through GitHub Releases. The links below use release tag `v0.1.0` and asset names `best.pt`, `last.pt`, and `best.onnx`; upload those assets to the release before publishing the links.
+Model weights are distributed through GitHub Releases because they exceed GitHub's normal 100MB per-file limit.
 
 | Name | Model Size (MB) | Link | SHA-256 |
 |---|---:|---|---|
