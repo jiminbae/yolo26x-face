@@ -10,6 +10,19 @@ This repository contains the training, dataset conversion, evaluation, and expor
 
 Inference demo using `best.pt` on a Pexels crowd-scene video by Matheus Bertelli.
 
+## Quick Start
+
+```bash
+pip install -r requirements.txt
+
+curl -L -o best.pt \
+  https://github.com/jiminbae/yolo26x-face/releases/download/v0.1.0/best.pt
+
+python train.py --mode predict \
+  --weights best.pt \
+  --source path/to/image_or_video
+```
+
 ## Model Summary
 
 | Name | Image Size (pixels) | mAPval 50-95 | Params | GFLOPs |
@@ -17,6 +30,22 @@ Inference demo using `best.pt` on a Pexels crowd-scene video by Matheus Bertelli
 | YOLO26x-Face | 1280 | 52.84 | 58.99M | 838.1 |
 
 The mAP value above is from Ultralytics validation on the local WIDERFace validation split. Official WIDERFace Easy/Medium/Hard AP is reported separately below.
+
+## Model Comparison
+
+| Model | Easy | Medium | Hard | Params |
+|---|---:|---:|---:|---:|
+| YOLOv8n-Face baseline | 93.79 | 91.82 | 79.38 | - |
+| YOLO26x-Face | 96.94 | 96.30 | 90.90 | 58.99M |
+
+## Speed
+
+Measured on NVIDIA RTX PRO 6000 Blackwell Workstation Edition with `people_crossing.mp4`.
+
+| Mode | Image Size | Latency | Throughput |
+|---|---:|---:|---:|
+| PyTorch predict, end-to-end | 736x1280 | 14.0 ms/frame | ~71 FPS |
+| Model inference only | 736x1280 | 10.1 ms/frame | ~99 FPS |
 
 ## Training Setup
 
