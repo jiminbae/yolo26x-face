@@ -4,6 +4,12 @@ YOLO26x-Face is a face detection model fine-tuned from Ultralytics YOLO26x on th
 
 This repository contains the training, dataset conversion, evaluation, and export scripts. It does not include the WIDERFace dataset or model weights by default.
 
+## Inference Demo
+
+![YOLO26x-Face inference demo](assets/people_crossing_inference.gif)
+
+The demo was generated with `best.pt` on a Pexels video by Matheus Bertelli. Source video: https://www.pexels.com/ko-kr/video/19229786/
+
 ## Model Summary
 
 | Name | Image Size (pixels) | mAPval 50-95 | Params | GFLOPs |
@@ -205,6 +211,8 @@ This project uses Ultralytics YOLO tooling and a YOLO26 pretrained model. Ultral
 
 This repository does not redistribute WIDERFace images, annotations, or archives. Users must download WIDERFace from the official dataset source and comply with the dataset's terms of use. Do not commit or redistribute the dataset files through this repository.
 
+The inference demo uses a modified Pexels video by Matheus Bertelli. Pexels videos may be used and modified for free, including for commercial use, but identifiable people must not be shown in a bad light or in an offensive context, and the demo must not imply endorsement by the people shown in the video, the creator, or Pexels.
+
 If you use WIDERFace, cite:
 
 ```bibtex
@@ -221,3 +229,4 @@ Relevant policy and documentation links:
 - Ultralytics license: https://www.ultralytics.com/license
 - Ultralytics documentation: https://docs.ultralytics.com/
 - WIDERFace dataset: https://shuoyang1213.me/WIDERFACE/
+- Pexels license: https://www.pexels.com/license/

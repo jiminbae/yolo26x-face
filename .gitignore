@@ -22,6 +22,7 @@ env/
 runs/
 widerface_eval/
 WiderFace-Evaluation/
+people_crossing.mp4
 
 # Dataset (large files)
 datasets/
