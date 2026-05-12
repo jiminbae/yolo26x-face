@@ -40,7 +40,7 @@ The mAP value above is from Ultralytics validation on the local WIDERFace valida
 
 ## Speed
 
-Measured on NVIDIA RTX PRO 6000 Blackwell Workstation Edition with `people_crossing.mp4`.
+Measured on NVIDIA RTX PRO 6000 Blackwell Server Edition with `people_crossing.mp4`.
 
 | Mode | Image Size | Latency | Throughput |
 |---|---:|---:|---:|
@@ -51,7 +51,7 @@ Measured on NVIDIA RTX PRO 6000 Blackwell Workstation Edition with `people_cross
 
 | Item | Value |
 |---|---|
-| GPU | NVIDIA RTX PRO 6000 Blackwell Workstation Edition |
+| GPU | NVIDIA RTX PRO 6000 Blackwell Server Edition |
 | VRAM | 96GB GDDR7 |
 | Training time | Approximately 12 hours |
 | Base model | `yolo26x.pt` |
