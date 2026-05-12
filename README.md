@@ -31,13 +31,6 @@ python train.py --mode predict \
 
 The mAP value above is from Ultralytics validation on the local WIDERFace validation split. Official WIDERFace Easy/Medium/Hard AP is reported separately below.
 
-## Model Comparison
-
-| Model | Easy | Medium | Hard | Params |
-|---|---:|---:|---:|---:|
-| YOLOv8n-Face baseline | 93.79 | 91.82 | 79.38 | - |
-| YOLO26x-Face | 96.94 | 96.30 | 90.90 | 58.99M |
-
 ## Speed
 
 Measured on NVIDIA RTX PRO 6000 Blackwell Server Edition with `people_crossing.mp4`.
